@@ -35,6 +35,7 @@ class LinearizableRegressor(CovarianceRegressor, EmbeddableModel):
                 "Weight covariance hasn't been fitted since the last time the model was trained."
             )
         X = self.embedding(X)
+        X = X.cpu()
 
         # We have to break up the calculation into chunks, because memory
         # usage is quite high

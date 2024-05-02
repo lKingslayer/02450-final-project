@@ -83,7 +83,7 @@ class BAITSelector(SampleSelector):
 
         if getattr(labelled_samples, 'has_Xy', False):
             labelled_samples = labelled_samples.X
-        labelled_samples = concatenate(labelled_samples, fixed_samples)
+        # labelled_samples = concatenate(labelled_samples, fixed_samples) # this causes bug and we dont need fixed_samples
 
         X_u = np.asarray(self.model.embedding(samples))
         X_l = np.asarray(self.model.embedding(labelled_samples))

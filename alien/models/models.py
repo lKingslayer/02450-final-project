@@ -52,6 +52,7 @@ class Model(metaclass=ABCMeta):
 
     def __init__(
         self,
+        model=None,
         X=None,
         y=None,
         data=None,
@@ -64,6 +65,8 @@ class Model(metaclass=ABCMeta):
     ):
         super().__init__()
 
+        if model is not None:
+            self.model = model
         if data is not None:
             self.data = data
             assert (X is None) and (y is None), "Only pass X,y *or* data to Model constructor"
@@ -120,6 +123,7 @@ class Model(metaclass=ABCMeta):
         :param fit_uncertainty: If `True`, a call to :meth:`fit` will also call
             :meth:`fit_uncertainty`. Defaults to `True`.
         """
+
         if reinitialize:
             self.initialize()
         self.fit_model(X=X, y=y, **kwargs)
@@ -132,6 +136,8 @@ class Model(metaclass=ABCMeta):
         Fit just the model component, and not the uncertainties (if these are
         computed separately)
         """
+        self.model.fit(X, y, **kwargs)
+  
 
     def fit_uncertainty(self, X=None, y=None):
         """
@@ -258,7 +264,7 @@ class Regressor(Model):
         if cls == Regressor:
             if test_if_pytorch(model):
                 from .pytorch import PytorchRegressor
-
+                
                 return PytorchRegressor.__new__(
                     PytorchRegressor, model=model, X=X, y=y, **kwargs
                 )

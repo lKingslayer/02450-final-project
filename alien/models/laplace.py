@@ -47,6 +47,7 @@ class LinearizableLaplaceRegressor(LaplaceApproxRegressor, LinearizableRegressor
     @get_defaults_from_self
     def fit_laplace(self, X=None, y=None, lamb=None):
         X = self.embedding(X)
+        X = X.cpu()
         self.weight_covariance = np.linalg.inv(
             sum_except(X[..., None, :] * X[..., :, None], (-1, -2)) + lamb * np.eye(X.shape[-1])
         )

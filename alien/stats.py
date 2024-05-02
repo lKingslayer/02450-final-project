@@ -56,7 +56,7 @@ def covariance_from_ensemble(preds, weights=None):
         preds = preds * weights
 
     if preds.ndim == 2:
-        return np.cov(preds)
+        return np.cov(preds.cpu())
 
     # preds.shape = (N, 50, 3)
 

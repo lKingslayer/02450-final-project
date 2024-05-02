@@ -58,6 +58,7 @@ class PytorchRegressor(LastLayerPytorchLinearization, MCDropoutRegressor, Linear
     def __init__(
         self,
         model=None,
+        device = None,
         X=None,
         y=None,
         trainer=None,
@@ -70,7 +71,7 @@ class PytorchRegressor(LastLayerPytorchLinearization, MCDropoutRegressor, Linear
         # imports occur inside __init__ to avoid import when not used:
         global torch  # pylint: disable=global-statement
         import torch
-
+        
         assert (
             isinstance(model, torch.nn.Module) or model is None
         ), f"model is of type {type(model)}. Should be torch.nn.Module or None."
@@ -78,6 +79,9 @@ class PytorchRegressor(LastLayerPytorchLinearization, MCDropoutRegressor, Linear
         self.batch_size = batch_size
         self.training_limit = training_limit
         self.collate_fn = collate_fn
+
+        # added
+        self.device = device
 
         pl_kwargs = dict_pop(kwargs, *pl_argnames)
 
@@ -146,18 +150,7 @@ class PytorchRegressor(LastLayerPytorchLinearization, MCDropoutRegressor, Linear
 
     @flatten_batch
     def predict(self, X, return_std_dev=False, convert_dtype=True):
-        import torch
-
-        try:
-            X = as_tensor(X)
-            if convert_dtype:
-                X = X.type(self.dtype)
-        except (ValueError, TypeError, RuntimeError):
-            pass
-
-        with torch.no_grad():
-            self.model.eval()
-            return self.model(X)
+        return self.trainer.predict(X)
 
     @flatten_batch
     def predict_samples(self, X, n=1, multiple=1.0, convert_dtype=True):
@@ -174,8 +167,10 @@ class PytorchRegressor(LastLayerPytorchLinearization, MCDropoutRegressor, Linear
         except (ValueError, TypeError, RuntimeError):
             pass
 
+        X = X.to(self.device)
+
         with torch.no_grad():
-            return torch.stack([self.model(X).squeeze() for _ in range(n)], dim=1)
+            return torch.stack([self.model(X).squeeze().float() for _ in range(n)], dim=1)
 
     @property
     def dtype(self):

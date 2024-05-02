@@ -11,3 +11,5 @@ from .dataset import (
     TupleDataset,
 )
 from .deepchem import DeepChemDataset, as_DCDataset
+
+from .kinase import KinaseDataset
